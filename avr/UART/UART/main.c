@@ -6,7 +6,7 @@
 #include <avr/io.h>
 
 #define FOSC 16000000
-#define BAUD 9600
+#define BAUD 9600 
 #define MYUBRR FOSC/16/BAUD-1
 
 #define sbi(var, mask)   ((var) |= (uint8_t)(1 << mask))
@@ -14,11 +14,13 @@
 
 #define STATUS_LED 0
 
+
 void ioinit(void);
 static int uart_putchar(char c, FILE *stream);
 uint8_t uart_getchar(void);
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 void delay_ms(uint16_t x);
+
 
 int main (void){
 
@@ -27,20 +29,20 @@ int main (void){
   while(1){
 		iter++;
 		printf("main() iteration #%d\n", iter);
-
+		
 		sbi(PORTC, STATUS_LED);
 		delay_ms(500);
 
 		cbi(PORTC, STATUS_LED);
 		delay_ms(500);
   }
-
+   
   return(0);
 }
 
 void ioinit (void){
     //1 = output, 0 = input
-    DDRB = 0b11101111; //PB4 = MISO
+    DDRB = 0b11101111; //PB4 = MISO 
     DDRC = 0b11111111; //
     DDRD = 0b11111110; //PORTD (RX on PD0)
 
@@ -48,17 +50,17 @@ void ioinit (void){
     UBRR0H = MYUBRR >> 8;
     UBRR0L = MYUBRR;
     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
-
+    
     stdout = &mystdout; //Required for printf init
 }
 
 static int uart_putchar(char c, FILE *stream){
 
     if (c == '\n') uart_putchar('\r', stream);
-
+  
     loop_until_bit_is_set(UCSR0A, UDRE0);
     UDR0 = c;
-
+    
     return 0;
 }
 
@@ -68,6 +70,7 @@ uint8_t uart_getchar(void){
     return(UDR0);
 }
 
+//General short delays
 void delay_ms(uint16_t x){
 
   uint8_t y, z;

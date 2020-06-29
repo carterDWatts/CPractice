@@ -1,0 +1,417 @@
+   1               		.file	"main.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  11               	uart_putchar:
+  12               	.LVL0:
+  13               	.LFB3:
+  14               		.file 1 "main.c"
+   1:main.c        **** /*
+   2:main.c        **** 	UART printf
+   3:main.c        **** */
+   4:main.c        **** 
+   5:main.c        **** #include <stdio.h>
+   6:main.c        **** #include <avr/io.h>
+   7:main.c        **** 
+   8:main.c        **** #define FOSC 16000000
+   9:main.c        **** #define BAUD 9600 
+  10:main.c        **** #define MYUBRR FOSC/16/BAUD-1
+  11:main.c        **** 
+  12:main.c        **** #define sbi(var, mask)   ((var) |= (uint8_t)(1 << mask))
+  13:main.c        **** #define cbi(var, mask)   ((var) &= (uint8_t)~(1 << mask))
+  14:main.c        **** 
+  15:main.c        **** #define STATUS_LED 0
+  16:main.c        **** 
+  17:main.c        **** 
+  18:main.c        **** void ioinit(void);
+  19:main.c        **** static int uart_putchar(char c, FILE *stream);
+  20:main.c        **** uint8_t uart_getchar(void);
+  21:main.c        **** static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+  22:main.c        **** void delay_ms(uint16_t x);
+  23:main.c        **** 
+  24:main.c        **** 
+  25:main.c        **** int main (void){
+  26:main.c        **** 
+  27:main.c        **** 	uint8_t iter =  0;
+  28:main.c        ****   ioinit(); //Setup IO pins and defaults
+  29:main.c        ****   while(1){
+  30:main.c        **** 		iter++;
+  31:main.c        **** 		printf("main() iteration #%d\n", iter);
+  32:main.c        **** 		
+  33:main.c        **** 		sbi(PORTC, STATUS_LED);
+  34:main.c        **** 		delay_ms(500);
+  35:main.c        **** 
+  36:main.c        **** 		cbi(PORTC, STATUS_LED);
+  37:main.c        **** 		delay_ms(500);
+  38:main.c        ****   }
+  39:main.c        ****    
+  40:main.c        ****   return(0);
+  41:main.c        **** }
+  42:main.c        **** 
+  43:main.c        **** void ioinit (void){
+  44:main.c        ****     //1 = output, 0 = input
+  45:main.c        ****     DDRB = 0b11101111; //PB4 = MISO 
+  46:main.c        ****     DDRC = 0b11111111; //
+  47:main.c        ****     DDRD = 0b11111110; //PORTD (RX on PD0)
+  48:main.c        **** 
+  49:main.c        ****     //USART Baud rate: 9600
+  50:main.c        ****     UBRR0H = MYUBRR >> 8;
+  51:main.c        ****     UBRR0L = MYUBRR;
+  52:main.c        ****     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+  53:main.c        ****     
+  54:main.c        ****     stdout = &mystdout; //Required for printf init
+  55:main.c        **** }
+  56:main.c        **** 
+  57:main.c        **** static int uart_putchar(char c, FILE *stream){
+  15               		.loc 1 57 46 view -0
+  16               		.cfi_startproc
+  17               		.loc 1 57 46 is_stmt 0 view .LVU1
+  18 0000 CF93      		push r28
+  19               	.LCFI0:
+  20               		.cfi_def_cfa_offset 3
+  21               		.cfi_offset 28, -2
+  22               	/* prologue: function */
+  23               	/* frame size = 0 */
+  24               	/* stack size = 1 */
+  25               	.L__stack_usage = 1
+  26 0002 C82F      		mov r28,r24
+  58:main.c        **** 
+  59:main.c        ****     if (c == '\n') uart_putchar('\r', stream);
+  27               		.loc 1 59 5 is_stmt 1 view .LVU2
+  28               		.loc 1 59 8 is_stmt 0 view .LVU3
+  29 0004 8A30      		cpi r24,lo8(10)
+  30 0006 01F4      		brne .L3
+  31               		.loc 1 59 20 is_stmt 1 discriminator 1 view .LVU4
+  32 0008 8DE0      		ldi r24,lo8(13)
+  33               	.LVL1:
+  34               		.loc 1 59 20 is_stmt 0 discriminator 1 view .LVU5
+  35 000a 0E94 0000 		call uart_putchar
+  36               	.LVL2:
+  37               	.L3:
+  60:main.c        ****   
+  61:main.c        ****     loop_until_bit_is_set(UCSR0A, UDRE0);
+  38               		.loc 1 61 5 is_stmt 1 discriminator 1 view .LVU6
+  39               		.loc 1 61 5 discriminator 1 view .LVU7
+  40               		.loc 1 61 5 discriminator 1 view .LVU8
+  41 000e 8091 C000 		lds r24,192
+  42 0012 85FF      		sbrs r24,5
+  43 0014 00C0      		rjmp .L3
+  62:main.c        ****     UDR0 = c;
+  44               		.loc 1 62 5 view .LVU9
+  45               		.loc 1 62 10 is_stmt 0 view .LVU10
+  46 0016 C093 C600 		sts 198,r28
+  63:main.c        ****     
+  64:main.c        ****     return 0;
+  47               		.loc 1 64 5 is_stmt 1 view .LVU11
+  65:main.c        **** }
+  48               		.loc 1 65 1 is_stmt 0 view .LVU12
+  49 001a 90E0      		ldi r25,0
+  50 001c 80E0      		ldi r24,0
+  51               	/* epilogue start */
+  52 001e CF91      		pop r28
+  53               	.LVL3:
+  54               		.loc 1 65 1 view .LVU13
+  55 0020 0895      		ret
+  56               		.cfi_endproc
+  57               	.LFE3:
+  59               	.global	ioinit
+  61               	ioinit:
+  62               	.LFB2:
+  43:main.c        ****     //1 = output, 0 = input
+  63               		.loc 1 43 19 is_stmt 1 view -0
+  64               		.cfi_startproc
+  65               	/* prologue: function */
+  66               	/* frame size = 0 */
+  67               	/* stack size = 0 */
+  68               	.L__stack_usage = 0
+  45:main.c        ****     DDRC = 0b11111111; //
+  69               		.loc 1 45 5 view .LVU15
+  45:main.c        ****     DDRC = 0b11111111; //
+  70               		.loc 1 45 10 is_stmt 0 view .LVU16
+  71 0022 8FEE      		ldi r24,lo8(-17)
+  72 0024 84B9      		out 0x4,r24
+  46:main.c        ****     DDRD = 0b11111110; //PORTD (RX on PD0)
+  73               		.loc 1 46 5 is_stmt 1 view .LVU17
+  46:main.c        ****     DDRD = 0b11111110; //PORTD (RX on PD0)
+  74               		.loc 1 46 10 is_stmt 0 view .LVU18
+  75 0026 8FEF      		ldi r24,lo8(-1)
+  76 0028 87B9      		out 0x7,r24
+  47:main.c        **** 
+  77               		.loc 1 47 5 is_stmt 1 view .LVU19
+  47:main.c        **** 
+  78               		.loc 1 47 10 is_stmt 0 view .LVU20
+  79 002a 8EEF      		ldi r24,lo8(-2)
+  80 002c 8AB9      		out 0xa,r24
+  50:main.c        ****     UBRR0L = MYUBRR;
+  81               		.loc 1 50 5 is_stmt 1 view .LVU21
+  50:main.c        ****     UBRR0L = MYUBRR;
+  82               		.loc 1 50 12 is_stmt 0 view .LVU22
+  83 002e 1092 C500 		sts 197,__zero_reg__
+  51:main.c        ****     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+  84               		.loc 1 51 5 is_stmt 1 view .LVU23
+  51:main.c        ****     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+  85               		.loc 1 51 12 is_stmt 0 view .LVU24
+  86 0032 87E6      		ldi r24,lo8(103)
+  87 0034 8093 C400 		sts 196,r24
+  52:main.c        ****     
+  88               		.loc 1 52 5 is_stmt 1 view .LVU25
+  52:main.c        ****     
+  89               		.loc 1 52 12 is_stmt 0 view .LVU26
+  90 0038 88E1      		ldi r24,lo8(24)
+  91 003a 8093 C100 		sts 193,r24
+  54:main.c        **** }
+  92               		.loc 1 54 5 is_stmt 1 view .LVU27
+  54:main.c        **** }
+  93               		.loc 1 54 12 is_stmt 0 view .LVU28
+  94 003e 80E0      		ldi r24,lo8(mystdout)
+  95 0040 90E0      		ldi r25,hi8(mystdout)
+  96 0042 9093 0000 		sts __iob+2+1,r25
+  97 0046 8093 0000 		sts __iob+2,r24
+  98               	/* epilogue start */
+  55:main.c        **** 
+  99               		.loc 1 55 1 view .LVU29
+ 100 004a 0895      		ret
+ 101               		.cfi_endproc
+ 102               	.LFE2:
+ 104               	.global	uart_getchar
+ 106               	uart_getchar:
+ 107               	.LFB4:
+  66:main.c        **** 
+  67:main.c        **** uint8_t uart_getchar(void){
+ 108               		.loc 1 67 27 is_stmt 1 view -0
+ 109               		.cfi_startproc
+ 110               	/* prologue: function */
+ 111               	/* frame size = 0 */
+ 112               	/* stack size = 0 */
+ 113               	.L__stack_usage = 0
+ 114               	.L8:
+  68:main.c        **** 
+  69:main.c        ****     while( !(UCSR0A & (1<<RXC0)) );
+ 115               		.loc 1 69 35 discriminator 1 view .LVU31
+ 116               		.loc 1 69 10 discriminator 1 view .LVU32
+ 117               		.loc 1 69 14 is_stmt 0 discriminator 1 view .LVU33
+ 118 004c 8091 C000 		lds r24,192
+ 119               		.loc 1 69 10 discriminator 1 view .LVU34
+ 120 0050 87FF      		sbrs r24,7
+ 121 0052 00C0      		rjmp .L8
+  70:main.c        ****     return(UDR0);
+ 122               		.loc 1 70 5 is_stmt 1 view .LVU35
+ 123               		.loc 1 70 12 is_stmt 0 view .LVU36
+ 124 0054 8091 C600 		lds r24,198
+ 125               	/* epilogue start */
+  71:main.c        **** }
+ 126               		.loc 1 71 1 view .LVU37
+ 127 0058 0895      		ret
+ 128               		.cfi_endproc
+ 129               	.LFE4:
+ 131               	.global	delay_ms
+ 133               	delay_ms:
+ 134               	.LVL4:
+ 135               	.LFB5:
+  72:main.c        **** 
+  73:main.c        **** //General short delays
+  74:main.c        **** void delay_ms(uint16_t x){
+ 136               		.loc 1 74 26 is_stmt 1 view -0
+ 137               		.cfi_startproc
+ 138               	/* prologue: function */
+ 139               	/* frame size = 0 */
+ 140               	/* stack size = 0 */
+ 141               	.L__stack_usage = 0
+ 142               		.loc 1 74 26 is_stmt 0 view .LVU39
+ 143 005a 9C01      		movw r18,r24
+  75:main.c        **** 
+  76:main.c        ****   uint8_t y, z;
+ 144               		.loc 1 76 3 is_stmt 1 view .LVU40
+  77:main.c        ****   for ( ; x > 0 ; x--){
+ 145               		.loc 1 77 3 view .LVU41
+ 146               	.LVL5:
+ 147               	.L11:
+ 148               		.loc 1 77 11 discriminator 1 view .LVU42
+ 149               		.loc 1 77 3 is_stmt 0 discriminator 1 view .LVU43
+ 150 005c 2115      		cp r18,__zero_reg__
+ 151 005e 3105      		cpc r19,__zero_reg__
+ 152 0060 01F4      		brne .L15
+ 153               	/* epilogue start */
+  78:main.c        ****     for ( y = 0 ; y < 80 ; y++){
+  79:main.c        ****       for ( z = 0 ; z < 40 ; z++){
+  80:main.c        ****         asm volatile ("nop");
+  81:main.c        ****       }
+  82:main.c        ****     }
+  83:main.c        ****   }
+  84:main.c        **** }
+ 154               		.loc 1 84 1 view .LVU44
+ 155 0062 0895      		ret
+ 156               	.L15:
+ 157 0064 90E5      		ldi r25,lo8(80)
+ 158               	.L14:
+ 159               	.LVL6:
+  79:main.c        ****         asm volatile ("nop");
+ 160               		.loc 1 79 21 is_stmt 1 view .LVU45
+  74:main.c        **** 
+ 161               		.loc 1 74 26 is_stmt 0 view .LVU46
+ 162 0066 88E2      		ldi r24,lo8(40)
+ 163               	.LVL7:
+ 164               	.L12:
+  80:main.c        ****       }
+ 165               		.loc 1 80 9 is_stmt 1 discriminator 3 view .LVU47
+ 166               	/* #APP */
+ 167               	 ;  80 "main.c" 1
+ 168 0068 0000      		nop
+ 169               	 ;  0 "" 2
+  79:main.c        ****         asm volatile ("nop");
+ 170               		.loc 1 79 30 discriminator 3 view .LVU48
+ 171               	.LVL8:
+  79:main.c        ****         asm volatile ("nop");
+ 172               		.loc 1 79 21 discriminator 3 view .LVU49
+ 173               	/* #NOAPP */
+ 174 006a 8150      		subi r24,lo8(-(-1))
+ 175               	.LVL9:
+  79:main.c        ****         asm volatile ("nop");
+ 176               		.loc 1 79 7 is_stmt 0 discriminator 3 view .LVU50
+ 177 006c 01F4      		brne .L12
+  78:main.c        ****       for ( z = 0 ; z < 40 ; z++){
+ 178               		.loc 1 78 28 is_stmt 1 discriminator 2 view .LVU51
+ 179               	.LVL10:
+  78:main.c        ****       for ( z = 0 ; z < 40 ; z++){
+ 180               		.loc 1 78 19 discriminator 2 view .LVU52
+ 181 006e 9150      		subi r25,lo8(-(-1))
+ 182               	.LVL11:
+  78:main.c        ****       for ( z = 0 ; z < 40 ; z++){
+ 183               		.loc 1 78 5 is_stmt 0 discriminator 2 view .LVU53
+ 184 0070 01F4      		brne .L14
+  77:main.c        ****     for ( y = 0 ; y < 80 ; y++){
+ 185               		.loc 1 77 19 is_stmt 1 view .LVU54
+  77:main.c        ****     for ( y = 0 ; y < 80 ; y++){
+ 186               		.loc 1 77 20 is_stmt 0 view .LVU55
+ 187 0072 2150      		subi r18,1
+ 188 0074 3109      		sbc r19,__zero_reg__
+ 189               	.LVL12:
+  77:main.c        ****     for ( y = 0 ; y < 80 ; y++){
+ 190               		.loc 1 77 20 view .LVU56
+ 191 0076 00C0      		rjmp .L11
+ 192               		.cfi_endproc
+ 193               	.LFE5:
+ 195               		.section	.rodata.str1.1,"aMS",@progbits,1
+ 196               	.LC0:
+ 197 0000 6D61 696E 		.string	"main() iteration #%d\n"
+ 197      2829 2069 
+ 197      7465 7261 
+ 197      7469 6F6E 
+ 197      2023 2564 
+ 198               		.section	.text.startup,"ax",@progbits
+ 199               	.global	main
+ 201               	main:
+ 202               	.LFB1:
+  25:main.c        **** 
+ 203               		.loc 1 25 16 is_stmt 1 view -0
+ 204               		.cfi_startproc
+ 205               	/* prologue: function */
+ 206               	/* frame size = 0 */
+ 207               	/* stack size = 0 */
+ 208               	.L__stack_usage = 0
+  27:main.c        ****   ioinit(); //Setup IO pins and defaults
+ 209               		.loc 1 27 2 view .LVU58
+ 210               	.LVL13:
+  28:main.c        ****   while(1){
+ 211               		.loc 1 28 3 view .LVU59
+ 212 0000 0E94 0000 		call ioinit
+ 213               	.LVL14:
+  27:main.c        ****   ioinit(); //Setup IO pins and defaults
+ 214               		.loc 1 27 10 is_stmt 0 view .LVU60
+ 215 0004 C0E0      		ldi r28,0
+  31:main.c        **** 		
+ 216               		.loc 1 31 3 view .LVU61
+ 217 0006 00E0      		ldi r16,lo8(.LC0)
+ 218 0008 10E0      		ldi r17,hi8(.LC0)
+ 219               	.LVL15:
+ 220               	.L18:
+  29:main.c        **** 		iter++;
+ 221               		.loc 1 29 3 is_stmt 1 discriminator 1 view .LVU62
+  30:main.c        **** 		printf("main() iteration #%d\n", iter);
+ 222               		.loc 1 30 3 discriminator 1 view .LVU63
+  30:main.c        **** 		printf("main() iteration #%d\n", iter);
+ 223               		.loc 1 30 7 is_stmt 0 discriminator 1 view .LVU64
+ 224 000a CF5F      		subi r28,lo8(-(1))
+ 225               	.LVL16:
+  31:main.c        **** 		
+ 226               		.loc 1 31 3 is_stmt 1 discriminator 1 view .LVU65
+ 227 000c 1F92      		push __zero_reg__
+ 228               	.LCFI1:
+ 229               		.cfi_def_cfa_offset 3
+ 230 000e CF93      		push r28
+ 231               	.LCFI2:
+ 232               		.cfi_def_cfa_offset 4
+ 233 0010 1F93      		push r17
+ 234               	.LCFI3:
+ 235               		.cfi_def_cfa_offset 5
+ 236 0012 0F93      		push r16
+ 237               	.LCFI4:
+ 238               		.cfi_def_cfa_offset 6
+ 239 0014 0E94 0000 		call printf
+ 240               	.LVL17:
+  33:main.c        **** 		delay_ms(500);
+ 241               		.loc 1 33 3 discriminator 1 view .LVU66
+ 242 0018 409A      		sbi 0x8,0
+  34:main.c        **** 
+ 243               		.loc 1 34 3 discriminator 1 view .LVU67
+ 244 001a 84EF      		ldi r24,lo8(-12)
+ 245 001c 91E0      		ldi r25,lo8(1)
+ 246 001e 0E94 0000 		call delay_ms
+ 247               	.LVL18:
+  36:main.c        **** 		delay_ms(500);
+ 248               		.loc 1 36 3 discriminator 1 view .LVU68
+ 249 0022 4098      		cbi 0x8,0
+  37:main.c        ****   }
+ 250               		.loc 1 37 3 discriminator 1 view .LVU69
+ 251 0024 84EF      		ldi r24,lo8(-12)
+ 252 0026 91E0      		ldi r25,lo8(1)
+ 253 0028 0E94 0000 		call delay_ms
+ 254               	.LVL19:
+  29:main.c        **** 		iter++;
+ 255               		.loc 1 29 8 discriminator 1 view .LVU70
+  37:main.c        ****   }
+ 256               		.loc 1 37 3 is_stmt 0 discriminator 1 view .LVU71
+ 257 002c 0F90      		pop __tmp_reg__
+ 258 002e 0F90      		pop __tmp_reg__
+ 259 0030 0F90      		pop __tmp_reg__
+ 260 0032 0F90      		pop __tmp_reg__
+ 261               	.LCFI5:
+ 262               		.cfi_def_cfa_offset 2
+ 263 0034 00C0      		rjmp .L18
+ 264               		.cfi_endproc
+ 265               	.LFE1:
+ 267               		.data
+ 270               	mystdout:
+ 271 0000 0000 00   		.zero	3
+ 272 0003 02        		.byte	2
+ 273 0004 0000 0000 		.zero	4
+ 274 0008 0000      		.word	gs(uart_putchar)
+ 275 000a 0000      		.word	0
+ 276 000c 0000      		.word	0
+ 277               		.text
+ 278               	.Letext0:
+ 279               		.file 2 "/usr/avr/include/stdint.h"
+ 280               		.file 3 "/usr/avr/include/stdio.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/ccliheFV.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccliheFV.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccliheFV.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccliheFV.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccliheFV.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccliheFV.s:11     .text:0000000000000000 uart_putchar
+     /tmp/ccliheFV.s:61     .text:0000000000000022 ioinit
+     /tmp/ccliheFV.s:270    .data:0000000000000000 mystdout
+     /tmp/ccliheFV.s:106    .text:000000000000004c uart_getchar
+     /tmp/ccliheFV.s:133    .text:000000000000005a delay_ms
+     /tmp/ccliheFV.s:201    .text.startup:0000000000000000 main
+
+UNDEFINED SYMBOLS
+__iob
+printf
+__do_copy_data
