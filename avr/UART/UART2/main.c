@@ -9,11 +9,17 @@
 #define BAUD 9600                 //transmission rate
 #define MYUBRR FOSC/16/BAUD-1     //( 16000000 / (16*9600) ) - 1
 
-void main(void){
+void USART_Init(unsigned int);
+void USART_Transmit(unsigned char);
+unsigned char USART_Receive(void);
+void USART_Flush(void);
+
+int main(void){
 
   USART_Init(MYUBRR);
   USART_Transmit('a');
 
+	return 0;
 }
 
 void USART_Init(unsigned int ubrr){
@@ -44,6 +50,6 @@ unsigned char USART_Receive(void){
 
 void USART_Flush(void){
 
-    unsigned char dummy;
-    while(UCSRnA & (1<<RXCn)) dummy = UDRn;
+	unsigned char dummy;
+	while(UCSRnA & (1<<RXCn)) dummy = UDRn;
 }
