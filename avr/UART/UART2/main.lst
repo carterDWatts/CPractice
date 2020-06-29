@@ -1,0 +1,331 @@
+   1               		.file	"main.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               	.global	USART_Init
+  12               	USART_Init:
+  13               	.LVL0:
+  14               	.LFB2:
+  15               		.file 1 "main.c"
+   1:main.c        **** /*
+   2:main.c        ****   UART
+   3:main.c        **** */
+   4:main.c        **** 
+   5:main.c        **** #include <stdio.h>
+   6:main.c        **** #include <avr/io.h>
+   7:main.c        **** 
+   8:main.c        **** #define FOSC 16000000  //1843200  //System clock speed
+   9:main.c        **** #define BAUD 9600                 //transmission rate
+  10:main.c        **** #define MYUBRR FOSC/16/BAUD-1     //( 16000000 / (16*9600) ) - 1
+  11:main.c        **** 
+  12:main.c        **** void USART_Init(unsigned int);
+  13:main.c        **** void USART_Transmit(unsigned char);
+  14:main.c        **** unsigned char USART_Receive(void);
+  15:main.c        **** void USART_Flush(void);
+  16:main.c        **** void delay_ms(uint16_t);
+  17:main.c        **** 
+  18:main.c        **** int main(void){
+  19:main.c        **** 
+  20:main.c        **** 	USART_Init(MYUBRR);
+  21:main.c        **** 
+  22:main.c        **** 	while(1){
+  23:main.c        ****   	USART_Transmit('a');
+  24:main.c        **** 		USART_Transmit('b');
+  25:main.c        **** 	
+  26:main.c        **** 		delay_ms(1000);
+  27:main.c        **** 	}
+  28:main.c        **** 
+  29:main.c        **** 	return 0;
+  30:main.c        **** }
+  31:main.c        **** 
+  32:main.c        **** void USART_Init(unsigned int ubrr){
+  16               		.loc 1 32 35 view -0
+  17               		.cfi_startproc
+  18               	/* prologue: function */
+  19               	/* frame size = 0 */
+  20               	/* stack size = 0 */
+  21               	.L__stack_usage = 0
+  33:main.c        ****   // Set baud rate
+  34:main.c        ****   UBRR0H = (unsigned char)(ubrr>>8);
+  22               		.loc 1 34 3 view .LVU1
+  23               		.loc 1 34 10 is_stmt 0 view .LVU2
+  24 0000 9093 C500 		sts 197,r25
+  35:main.c        ****   UBRR0L = (unsigned char)ubrr;
+  25               		.loc 1 35 3 is_stmt 1 view .LVU3
+  26               		.loc 1 35 10 is_stmt 0 view .LVU4
+  27 0004 8093 C400 		sts 196,r24
+  36:main.c        **** 
+  37:main.c        ****   // enable receiver & transmitter
+  38:main.c        ****   UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+  28               		.loc 1 38 3 is_stmt 1 view .LVU5
+  29               		.loc 1 38 10 is_stmt 0 view .LVU6
+  30 0008 88E1      		ldi r24,lo8(24)
+  31               	.LVL1:
+  32               		.loc 1 38 10 view .LVU7
+  33 000a 8093 C100 		sts 193,r24
+  39:main.c        **** 
+  40:main.c        ****   // Set frame format: 8 data, 2 stop bit
+  41:main.c        ****   UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+  34               		.loc 1 41 3 is_stmt 1 view .LVU8
+  35               		.loc 1 41 10 is_stmt 0 view .LVU9
+  36 000e 8EE0      		ldi r24,lo8(14)
+  37 0010 8093 C200 		sts 194,r24
+  38               	/* epilogue start */
+  42:main.c        **** 
+  43:main.c        **** }
+  39               		.loc 1 43 1 view .LVU10
+  40 0014 0895      		ret
+  41               		.cfi_endproc
+  42               	.LFE2:
+  44               	.global	USART_Transmit
+  46               	USART_Transmit:
+  47               	.LFB3:
+  44:main.c        **** 
+  45:main.c        **** void USART_Transmit(unsigned char data){
+  48               		.loc 1 45 40 is_stmt 1 view -0
+  49               		.cfi_startproc
+  50               	/* prologue: function */
+  51               	/* frame size = 0 */
+  52               	/* stack size = 0 */
+  53               	.L__stack_usage = 0
+  54               	.LVL2:
+  55               	.L3:
+  46:main.c        ****   // wait for empty transmit buffer
+  47:main.c        ****   while(!(UCSR0A & (1<<UDRE0)));
+  56               		.loc 1 47 32 discriminator 1 view .LVU12
+  57               		.loc 1 47 8 discriminator 1 view .LVU13
+  58               		.loc 1 47 11 is_stmt 0 discriminator 1 view .LVU14
+  59 0016 9091 C000 		lds r25,192
+  60               		.loc 1 47 8 discriminator 1 view .LVU15
+  61 001a 95FF      		sbrs r25,5
+  62 001c 00C0      		rjmp .L3
+  48:main.c        ****   UDR0 = data;
+  63               		.loc 1 48 3 is_stmt 1 view .LVU16
+  64               		.loc 1 48 8 is_stmt 0 view .LVU17
+  65 001e 8093 C600 		sts 198,r24
+  66               	/* epilogue start */
+  49:main.c        **** }
+  67               		.loc 1 49 1 view .LVU18
+  68 0022 0895      		ret
+  69               		.cfi_endproc
+  70               	.LFE3:
+  72               	.global	USART_Receive
+  74               	USART_Receive:
+  75               	.LFB4:
+  50:main.c        **** 
+  51:main.c        **** unsigned char USART_Receive(void){
+  76               		.loc 1 51 34 is_stmt 1 view -0
+  77               		.cfi_startproc
+  78               	/* prologue: function */
+  79               	/* frame size = 0 */
+  80               	/* stack size = 0 */
+  81               	.L__stack_usage = 0
+  82               	.L7:
+  52:main.c        **** 
+  53:main.c        ****   // wait for data to be received
+  54:main.c        ****   while(!(UCSR0A & (1<<RXC0)));
+  83               		.loc 1 54 31 discriminator 1 view .LVU20
+  84               		.loc 1 54 8 discriminator 1 view .LVU21
+  85               		.loc 1 54 11 is_stmt 0 discriminator 1 view .LVU22
+  86 0024 8091 C000 		lds r24,192
+  87               		.loc 1 54 8 discriminator 1 view .LVU23
+  88 0028 87FF      		sbrs r24,7
+  89 002a 00C0      		rjmp .L7
+  55:main.c        ****   return UDR0;
+  90               		.loc 1 55 3 is_stmt 1 view .LVU24
+  91               		.loc 1 55 10 is_stmt 0 view .LVU25
+  92 002c 8091 C600 		lds r24,198
+  93               	/* epilogue start */
+  56:main.c        **** }
+  94               		.loc 1 56 1 view .LVU26
+  95 0030 0895      		ret
+  96               		.cfi_endproc
+  97               	.LFE4:
+  99               	.global	USART_Flush
+ 101               	USART_Flush:
+ 102               	.LFB5:
+  57:main.c        **** 
+  58:main.c        **** void USART_Flush(void){
+ 103               		.loc 1 58 23 is_stmt 1 view -0
+ 104               		.cfi_startproc
+ 105               	/* prologue: function */
+ 106               	/* frame size = 0 */
+ 107               	/* stack size = 0 */
+ 108               	.L__stack_usage = 0
+  59:main.c        **** 
+  60:main.c        **** 	unsigned char dummy;
+ 109               		.loc 1 60 2 view .LVU28
+  61:main.c        **** 	while(UCSR0A & (1<<RXC0)) dummy = UDR0;
+ 110               		.loc 1 61 2 view .LVU29
+ 111               	.L10:
+ 112               		.loc 1 61 7 discriminator 1 view .LVU30
+ 113               		.loc 1 61 8 is_stmt 0 discriminator 1 view .LVU31
+ 114 0032 8091 C000 		lds r24,192
+ 115               		.loc 1 61 7 discriminator 1 view .LVU32
+ 116 0036 87FF      		sbrs r24,7
+ 117               	/* epilogue start */
+  62:main.c        **** }
+ 118               		.loc 1 62 1 view .LVU33
+ 119 0038 0895      		ret
+ 120               	.L11:
+  61:main.c        **** 	while(UCSR0A & (1<<RXC0)) dummy = UDR0;
+ 121               		.loc 1 61 28 is_stmt 1 discriminator 2 view .LVU34
+  61:main.c        **** 	while(UCSR0A & (1<<RXC0)) dummy = UDR0;
+ 122               		.loc 1 61 34 is_stmt 0 discriminator 2 view .LVU35
+ 123 003a 8091 C600 		lds r24,198
+ 124 003e 00C0      		rjmp .L10
+ 125               		.cfi_endproc
+ 126               	.LFE5:
+ 128               	.global	delay_ms
+ 130               	delay_ms:
+ 131               	.LVL3:
+ 132               	.LFB6:
+  63:main.c        **** 
+  64:main.c        **** void delay_ms(uint16_t x){
+ 133               		.loc 1 64 26 is_stmt 1 view -0
+ 134               		.cfi_startproc
+ 135               	/* prologue: function */
+ 136               	/* frame size = 0 */
+ 137               	/* stack size = 0 */
+ 138               	.L__stack_usage = 0
+ 139               		.loc 1 64 26 is_stmt 0 view .LVU37
+ 140 0040 9C01      		movw r18,r24
+  65:main.c        **** 	uint8_t y, z;
+ 141               		.loc 1 65 2 is_stmt 1 view .LVU38
+  66:main.c        **** 	for( ; x > 0; x--){
+ 142               		.loc 1 66 2 view .LVU39
+ 143               	.LVL4:
+ 144               	.L13:
+ 145               		.loc 1 66 9 discriminator 1 view .LVU40
+ 146               		.loc 1 66 2 is_stmt 0 discriminator 1 view .LVU41
+ 147 0042 2115      		cp r18,__zero_reg__
+ 148 0044 3105      		cpc r19,__zero_reg__
+ 149 0046 01F4      		brne .L17
+ 150               	/* epilogue start */
+  67:main.c        **** 		for(y=0; y < 80; y++){
+  68:main.c        **** 			for(z=0; z < 40; z++){
+  69:main.c        **** 				asm volatile("nop");
+  70:main.c        **** 			}
+  71:main.c        **** 		}
+  72:main.c        **** 	}
+  73:main.c        **** }
+ 151               		.loc 1 73 1 view .LVU42
+ 152 0048 0895      		ret
+ 153               	.L17:
+ 154 004a 90E5      		ldi r25,lo8(80)
+ 155               	.L16:
+ 156               	.LVL5:
+  68:main.c        **** 				asm volatile("nop");
+ 157               		.loc 1 68 13 is_stmt 1 view .LVU43
+  64:main.c        **** 	uint8_t y, z;
+ 158               		.loc 1 64 26 is_stmt 0 view .LVU44
+ 159 004c 88E2      		ldi r24,lo8(40)
+ 160               	.LVL6:
+ 161               	.L14:
+  69:main.c        **** 			}
+ 162               		.loc 1 69 5 is_stmt 1 discriminator 3 view .LVU45
+ 163               	/* #APP */
+ 164               	 ;  69 "main.c" 1
+ 165 004e 0000      		nop
+ 166               	 ;  0 "" 2
+  68:main.c        **** 				asm volatile("nop");
+ 167               		.loc 1 68 21 discriminator 3 view .LVU46
+ 168               	.LVL7:
+  68:main.c        **** 				asm volatile("nop");
+ 169               		.loc 1 68 13 discriminator 3 view .LVU47
+  68:main.c        **** 				asm volatile("nop");
+ 170               		.loc 1 68 4 is_stmt 0 discriminator 3 view .LVU48
+ 171               	/* #NOAPP */
+ 172 0050 8150      		subi r24,lo8(-(-1))
+ 173               	.LVL8:
+  68:main.c        **** 				asm volatile("nop");
+ 174               		.loc 1 68 4 discriminator 3 view .LVU49
+ 175 0052 01F4      		brne .L14
+  67:main.c        **** 			for(z=0; z < 40; z++){
+ 176               		.loc 1 67 20 is_stmt 1 discriminator 2 view .LVU50
+ 177               	.LVL9:
+  67:main.c        **** 			for(z=0; z < 40; z++){
+ 178               		.loc 1 67 12 discriminator 2 view .LVU51
+  67:main.c        **** 			for(z=0; z < 40; z++){
+ 179               		.loc 1 67 3 is_stmt 0 discriminator 2 view .LVU52
+ 180 0054 9150      		subi r25,lo8(-(-1))
+ 181               	.LVL10:
+  67:main.c        **** 			for(z=0; z < 40; z++){
+ 182               		.loc 1 67 3 discriminator 2 view .LVU53
+ 183 0056 01F4      		brne .L16
+  66:main.c        **** 		for(y=0; y < 80; y++){
+ 184               		.loc 1 66 16 is_stmt 1 view .LVU54
+  66:main.c        **** 		for(y=0; y < 80; y++){
+ 185               		.loc 1 66 17 is_stmt 0 view .LVU55
+ 186 0058 2150      		subi r18,1
+ 187 005a 3109      		sbc r19,__zero_reg__
+ 188               	.LVL11:
+  66:main.c        **** 		for(y=0; y < 80; y++){
+ 189               		.loc 1 66 17 view .LVU56
+ 190 005c 00C0      		rjmp .L13
+ 191               		.cfi_endproc
+ 192               	.LFE6:
+ 194               		.section	.text.startup,"ax",@progbits
+ 195               	.global	main
+ 197               	main:
+ 198               	.LFB1:
+  18:main.c        **** 
+ 199               		.loc 1 18 15 is_stmt 1 view -0
+ 200               		.cfi_startproc
+ 201               	/* prologue: function */
+ 202               	/* frame size = 0 */
+ 203               	/* stack size = 0 */
+ 204               	.L__stack_usage = 0
+  20:main.c        **** 
+ 205               		.loc 1 20 2 view .LVU58
+ 206 0000 87E6      		ldi r24,lo8(103)
+ 207 0002 90E0      		ldi r25,0
+ 208 0004 0E94 0000 		call USART_Init
+ 209               	.LVL12:
+ 210               	.L20:
+  22:main.c        ****   	USART_Transmit('a');
+ 211               		.loc 1 22 2 discriminator 1 view .LVU59
+  23:main.c        **** 		USART_Transmit('b');
+ 212               		.loc 1 23 4 discriminator 1 view .LVU60
+ 213 0008 81E6      		ldi r24,lo8(97)
+ 214 000a 0E94 0000 		call USART_Transmit
+ 215               	.LVL13:
+  24:main.c        **** 	
+ 216               		.loc 1 24 3 discriminator 1 view .LVU61
+ 217 000e 82E6      		ldi r24,lo8(98)
+ 218 0010 0E94 0000 		call USART_Transmit
+ 219               	.LVL14:
+  26:main.c        **** 	}
+ 220               		.loc 1 26 3 discriminator 1 view .LVU62
+ 221 0014 88EE      		ldi r24,lo8(-24)
+ 222 0016 93E0      		ldi r25,lo8(3)
+ 223 0018 0E94 0000 		call delay_ms
+ 224               	.LVL15:
+  22:main.c        ****   	USART_Transmit('a');
+ 225               		.loc 1 22 7 discriminator 1 view .LVU63
+ 226 001c 00C0      		rjmp .L20
+ 227               		.cfi_endproc
+ 228               	.LFE1:
+ 230               		.text
+ 231               	.Letext0:
+ 232               		.file 2 "/usr/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/ccAhGVUZ.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccAhGVUZ.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccAhGVUZ.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccAhGVUZ.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccAhGVUZ.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccAhGVUZ.s:12     .text:0000000000000000 USART_Init
+     /tmp/ccAhGVUZ.s:46     .text:0000000000000016 USART_Transmit
+     /tmp/ccAhGVUZ.s:74     .text:0000000000000024 USART_Receive
+     /tmp/ccAhGVUZ.s:101    .text:0000000000000032 USART_Flush
+     /tmp/ccAhGVUZ.s:130    .text:0000000000000040 delay_ms
+     /tmp/ccAhGVUZ.s:197    .text.startup:0000000000000000 main
+
+NO UNDEFINED SYMBOLS

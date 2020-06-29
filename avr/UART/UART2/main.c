@@ -13,11 +13,18 @@ void USART_Init(unsigned int);
 void USART_Transmit(unsigned char);
 unsigned char USART_Receive(void);
 void USART_Flush(void);
+void delay_ms(uint16_t);
 
 int main(void){
 
-  USART_Init(MYUBRR);
-  USART_Transmit('a');
+	USART_Init(MYUBRR);
+
+	while(1){
+  	USART_Transmit('a');
+		USART_Transmit('b');
+	
+		delay_ms(1000);
+	}
 
 	return 0;
 }
@@ -37,19 +44,31 @@ void USART_Init(unsigned int ubrr){
 
 void USART_Transmit(unsigned char data){
   // wait for empty transmit buffer
-  while(!(UCSRnA & (1<<UDREn)));
-  UDRn = data;
+  while(!(UCSR0A & (1<<UDRE0)));
+  UDR0 = data;
 }
 
 unsigned char USART_Receive(void){
 
   // wait for data to be received
-  while(!(UCSRnA & (1<<RXCn)));
-  return UDRn;
+  while(!(UCSR0A & (1<<RXC0)));
+  return UDR0;
 }
 
 void USART_Flush(void){
 
 	unsigned char dummy;
-	while(UCSRnA & (1<<RXCn)) dummy = UDRn;
+	while(UCSR0A & (1<<RXC0)) dummy = UDR0;
 }
+
+void delay_ms(uint16_t x){
+	uint8_t y, z;
+	for( ; x > 0; x--){
+		for(y=0; y < 80; y++){
+			for(z=0; z < 40; z++){
+				asm volatile("nop");
+			}
+		}
+	}
+}
+
