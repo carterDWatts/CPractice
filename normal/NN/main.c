@@ -9,60 +9,35 @@
 #include "network.h"
 #include "network_math.h"
 
+
 int main(void){
 
-  int r = 2, c = 2;
-  double** arrA;
-  initialize_double_arr(&arrA, r, c);
-  double** arrB;
-  initialize_double_arr(&arrB, r, c);
-
-  for(int i = 0; i < r; i++){
-    for (int j = 0; j < c; j++) {
-      arrA[i][j] = 2;
-      arrB[i][j] = 2;
-    }
-  }
-
-  print_array(arrA, r, c);
-  print_array(arrB, r, c);
-
-
-
-  double** arrC;
-  initialize_double_arr(&arrC, r, c);
-  printf("test0\n");
-  arrC = matrix_multiply(r, c, arrA, r, c, arrB);
-  printf("test1\n");
-  //print_array(arrC, r, c);
-  /*
-  layer l = {.num_neurons = 1, .num_inputs_per_neuron = 3, .weights = 0};
-  generate_weight_matrix(&l);
-
-  /*
-  for(int i = 0; i < rows; i++){
-    for(int j = 0; j < cols; j++){
-      printf("%f ", c[i][j]);
-    }
-    printf("\n");
-  }
-  */
-
-  /*
-  network net = {.l1 = l};
-  double inputs[][3] = {
+  layer input = {.rows = 4, .cols = 3};
+  initialize_double_pointer(&input.values, input.rows, input.cols);
+  double in_values[4][3] = { //3 = l.num_inputs_per_neuron
     {0,0,1},
     {1,1,1},
     {1,0,1},
     {0,1,1}};
-  double outputs[][1] = {
+  input.values = (double **) assign_values(input.rows, input.cols, in_values);
+
+  layer answers = {.rows = 4, .cols = 1};
+  initialize_double_pointer(&answers.values, answers.rows, answers.cols);
+  double answer_values[4][1] = { //1 = l.num_neurons
     {0},
     {1},
     {1},
     {0}};
+  answers.values = (double **) assign_values(answers.rows, answers.cols, answer_values);
 
+  hidden_layer hl = {.num_inputs_per_neuron = 3, .num_neurons = 1,  .rows = hl.num_inputs_per_neuron, .cols = hl.num_neurons, .weights = 0};
+  generate_weight_matrix(&hl); //Sets values to random double between 0 & 1
 
+  layer ol = {.rows = input.rows, .cols = hl.num_inputs_per_neuron};
+  initialize_double_pointer(&ol.values, ol.rows, ol.cols);
 
-  train(net, sizeof(inputs[0])/sizeof(inputs[0][0]), inputs, sizeof(outputs[0])/sizeof(outputs[0][0]), outputs, 1);
-  */
+  network net = {.l1 = hl, .output_layer = ol};
+
+  train(net, input, answers, 10);
+  
 }

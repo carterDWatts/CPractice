@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <time.h>
 
-void generate_weight_matrix(layer *L){
+void generate_weight_matrix(hidden_layer *L){
 
-    double **array = malloc(sizeof(*array) * L->num_neurons);
+    double **array = malloc(sizeof(*array) * L->rows);
     if (array != 0){
-        for (int i = 0; i < L->num_neurons; ++i){
-             if ((array[i] = malloc(sizeof(**array) * L->num_inputs_per_neuron)) == 0){
+        for (int i = 0; i < L->rows; ++i){
+             if ((array[i] = malloc(sizeof(**array) * L->cols)) == 0){
                  for (int j = 0; j < i; j++)
                       free(array[j]);
                  free(array);
@@ -29,6 +29,4 @@ void generate_weight_matrix(layer *L){
     }
 
     L->weights = array;
-
-
 }

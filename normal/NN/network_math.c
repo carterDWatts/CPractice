@@ -15,7 +15,7 @@ double sigmoid_derivative(double x){
 double**  matrix_add(double **A, double **B, int rows, int cols){
 
   double** result;
-  initialize_double_arr(&result, rows, cols);
+  initialize_double_pointer(&result, rows, cols);
 
   for(int i = 0; i < rows; i++){
     for(int j = 0; j < cols; j++){
@@ -23,13 +23,12 @@ double**  matrix_add(double **A, double **B, int rows, int cols){
     }
   }
   return result;
-
 }
 
 double** matrix_subtract(double **A, double **B, int rows, int cols){
 
   double** result;
-  initialize_double_arr(&result, rows, cols);
+  initialize_double_pointer(&result, rows, cols);
 
   for(int i = 0; i < rows; i++){
     for(int j = 0; j < cols; j++){
@@ -37,38 +36,33 @@ double** matrix_subtract(double **A, double **B, int rows, int cols){
     }
   }
   return result;
-
 }
 
 
-double** matrix_multiply(int rA, int cA, double **A, int rB, int cB, double **B){
+double*** matrix_multiply(int rA, int cA, double **A, int rB, int cB, double **B){
 
-  if (!((cA==rB)&&(rA==cB))){
-    printf("Row column miss matching so cannot do matrix multiplication");
+  //printf("0\n");
+  double **result;
+  //printf("1\n");
+  //printf("rA: %d, cB: %d\n", rA, cB);
+  initialize_double_pointer(&result, rA, cB);
+  //printf("2\n");
+
+  if (cA!=rB){
+    printf("Row column missmatch - cannot do matrix multiplication\n");
   }else{
-
-    double **result;
-    initialize_double_arr(&result, rA, cB);
-
-    printf("test2\n");
-
     double sum;
+    //printf("3\n");
     for (int i = 0; i < rA; i++){
         for (int j = 0; j < cB; j++){
-
-            printf("test2\n");
-            sum = 0;
-            /*
-             * Find sum of product of each elements of
-             * rows of first matrix and columns of second
-             * matrix.
-             */
-            for (int k = 0; k < cB; k++){
-                sum += (*(*(A + rA) + i)) * (*(*(B + i) + cB));
-            }
-            result[i][j] = sum; //*(*(res + row) + col)
+          sum = 0;
+          for (int k = 0; k < cB; k++){
+            sum += A[i][k] * B[k][j];
+          }
+          result[i][j] = sum;
         }
       }
+      //printf("4\n");
     }
-
+    return *result;
 }
