@@ -12,9 +12,10 @@
 
 int main(void){
 
+  //Creats, allocates, and sets values for input layer
   layer input = {.rows = 4, .cols = 3};
-  initialize_double_pointer(&input.values, input.rows, input.cols);
-  double in_values[4][3] = { //3 = l.num_inputs_per_neuron
+  initialize_double_pointer(&input.values, input.rows, input.cols);             //allocates space in memory the size of rows and cols
+  double in_values[4][3] = { //3 = l.num_inputs_per_neuron                      //Values set to this
     {0,0,1},
     {1,1,1},
     {1,0,1},
@@ -22,8 +23,8 @@ int main(void){
   input.values = (double **) assign_values(input.rows, input.cols, in_values);
 
   layer answers = {.rows = 4, .cols = 1};
-  initialize_double_pointer(&answers.values, answers.rows, answers.cols);
-  double answer_values[4][1] = { //1 = l.num_neurons
+  initialize_double_pointer(&answers.values, answers.rows, answers.cols);       //allocates space in memory the size of rows and cols
+  double answer_values[4][1] = { //1 = l.num_neurons                            //Values set to this
     {0},
     {1},
     {1},
@@ -39,5 +40,5 @@ int main(void){
   network net = {.l1 = hl, .output_layer = ol};
 
   train(net, input, answers, 10);
-  
+
 }

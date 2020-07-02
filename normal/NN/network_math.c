@@ -12,57 +12,53 @@ double sigmoid_derivative(double x){
   return x * (1-x);
 }
 
-double**  matrix_add(double **A, double **B, int rows, int cols){
-
-  double** result;
-  initialize_double_pointer(&result, rows, cols);
+void matrix_add(double** matrix, double** A, double** B, int rows, int cols){
 
   for(int i = 0; i < rows; i++){
     for(int j = 0; j < cols; j++){
-      result[i][j] = A[i][j] + B[i][j];
+      matrix[i][j] = A[i][j] + B[i][j];
     }
   }
-  return result;
 }
-
-double** matrix_subtract(double **A, double **B, int rows, int cols){
-
-  double** result;
-  initialize_double_pointer(&result, rows, cols);
+void matrix_subtract(double** matrix, double** A, double** B, int rows, int cols){
 
   for(int i = 0; i < rows; i++){
     for(int j = 0; j < cols; j++){
-      result[i][j] = A[i][j] - B[i][j];
+      matrix[i][j] = A[i][j] - B[i][j];
     }
   }
-  return result;
 }
 
-
-double*** matrix_multiply(int rA, int cA, double **A, int rB, int cB, double **B){
-
-  //printf("0\n");
-  double **result;
-  //printf("1\n");
-  //printf("rA: %d, cB: %d\n", rA, cB);
-  initialize_double_pointer(&result, rA, cB);
-  //printf("2\n");
+void matrix_multiply(double** matrix, int rA, int cA, double **A, int rB, int cB, double **B){
 
   if (cA!=rB){
     printf("Row column missmatch - cannot do matrix multiplication\n");
+    return;
   }else{
+
     double sum;
     //printf("3\n");
     for (int i = 0; i < rA; i++){
-        for (int j = 0; j < cB; j++){
-          sum = 0;
-          for (int k = 0; k < cB; k++){
-            sum += A[i][k] * B[k][j];
-          }
-          result[i][j] = sum;
+      for (int j = 0; j < cB; j++){
+        sum = 0;
+        for (int k = 0; k < cB; k++){
+          sum += A[i][k] * B[k][j];
         }
+        matrix[i][j] = sum;
       }
-      //printf("4\n");
     }
-    return *result;
+  }
+}
+void scalar_multiply(double** matrix, int rA, int cA, double **A, int rB, int cB, double **B){
+
+  if (rA!=rB){
+    printf("size missmatch - cannot do matrix multiplication\n");
+  }else{
+
+    for(int i = 0; i < rA; i++){
+      for(int j = 0; j < cA; j++){
+        matrix[i][j] = A[i][j] * B[i][j];
+      }
+    }
+  }
 }
