@@ -27,16 +27,11 @@ void print_double_pointer(double **A, int r, int c){
 
 }
 
-double** assign_values(int r, int c, double values[r][c]){
-
-  double** result;
-  initialize_double_pointer(&result, r, c);
+void assign_values(double** matrix, int r, int c, double values[r][c]){
 
   for(int i = 0; i < r; i++){
     for (int j = 0; j < c; j++) {
-      result[i][j] = values[i][j];
+      matrix[i][j] = values[i][j];
     }
   }
-  return result;
-
 }
