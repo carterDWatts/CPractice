@@ -32,8 +32,8 @@ int main(void){
   initialize_double_pointer(&answers.values, answers.rows, answers.cols);       //allocates space in memory the size of rows and cols
   double answer_values[4][1] = { //1 = l.num_neurons                            //Values set to this
     {1},
-    {0},
     {1},
+    {0},
     {0}};
   assign_values(answers.values, answers.rows, answers.cols, answer_values);
 
@@ -45,7 +45,7 @@ int main(void){
 
   network net = {.l1 = hl, .output_layer = ol};
 
-  train(net, input, answers, 100000);
+  train(net, input, answers, 10000);
 
   //Predctions
   layer test_input = {.rows = 4, .cols = 3};
@@ -63,7 +63,7 @@ int main(void){
     {1},
     {0},
     {1},
-    {0}};
+    {1}};
   assign_values(correct_answers.values, correct_answers.rows, correct_answers.cols, correct_values);
 
   predict(test_input, correct_answers, net);

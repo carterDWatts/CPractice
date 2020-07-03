@@ -65,7 +65,6 @@ void train(network net, layer input, layer answers, int training_iterations){
     }
 
     if(i%100 == 0){
-
       printf("%d/%d\n", i, training_iterations);
     }
     /*
