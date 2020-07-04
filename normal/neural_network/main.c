@@ -14,7 +14,7 @@ void predict(layer test_input, layer answers, network net);
 int main(void){
 
   /* CURRENT SETUP
-      a row that adds up to 2 is a 1
+      a row that adds up to 2 & has a 1 in col 0 is a 1
       any other row is a 0
   */
 
@@ -32,7 +32,7 @@ int main(void){
   initialize_double_pointer(&answers.values, answers.rows, answers.cols);       //allocates space in memory the size of rows and cols
   double answer_values[4][1] = { //1 = l.num_neurons                            //Values set to this
     {1},
-    {1},
+    {0},
     {0},
     {0}};
   assign_values(answers.values, answers.rows, answers.cols, answer_values);
@@ -63,7 +63,7 @@ int main(void){
     {1},
     {0},
     {1},
-    {1}};
+    {0}};
   assign_values(correct_answers.values, correct_answers.rows, correct_answers.cols, correct_values);
 
   predict(test_input, correct_answers, net);
